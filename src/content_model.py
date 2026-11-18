@@ -86,3 +86,36 @@ def recommend_movies(movie_id, df, tfidf_matrix, top_n=10):
     )
 
     return recommendations.reset_index(drop=True)
+
+
+
+def calculate_all_similarities(movie_id, df, tfidf_matrix):
+    """
+    Calculate cosine similarity between the selected movie
+    and every movie in the dataset.
+    """
+    movie_positions = np.flatnonzero(
+        df["movie_id"].to_numpy() == movie_id
+    )
+
+    if len(movie_positions) == 0:
+        raise ValueError(f"Movie ID {movie_id} not found")
+
+    movie_position = movie_positions[0]
+
+    similarity_scores = cosine_similarity(
+        tfidf_matrix[movie_position],
+        tfidf_matrix
+    ).flatten()
+
+    results = df[
+    ["movie_id", "title", "genres", "poster_path"]
+    ].copy()
+    
+    results["similarity_score"] = similarity_scores
+
+    results = results[
+        results["movie_id"] != movie_id
+    ]
+
+    return results.reset_index(drop=True)

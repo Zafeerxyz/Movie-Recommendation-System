@@ -1,12 +1,25 @@
 import requests
 import time
 
-# url = "https://api.themoviedb.org/3/movie/popular"
+
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+TMDB_API_KEY = os.getenv("TMDB_API_KEY")
+
+if not TMDB_API_KEY:
+    raise ValueError("TMDB_API_KEY not found in .env")
 
 headers = {
-    "Authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJlOTg4YTQxZThhM2RmNjg1MDJhYWE3MTU2MDRlYTE0NCIsIm5iZiI6MTc5NDQ3MjA1Ny43NTUsInN1YiI6IjZhZjU3ODc5ZTBhNDlhYzAyMjRlNzg0ZiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.SDHNyBlwJgz7l8iMNS8sDPQGT2Ik-tDlMi7QKJjxZsU",
+    "Authorization": f"Bearer {TMDB_API_KEY}",
     "accept": "application/json"
 }
+
+
+# url = "https://api.themoviedb.org/3/movie/popular"
+
 
 movie_id = 687163
 
@@ -99,9 +112,19 @@ movie_record = {
     "vote_average": movie_details["vote_average"],
     "vote_count": movie_details["vote_count"],
     "popularity": movie_details["popularity"],
+    "poster_path": movie_details.get("poster_path"),
     "cast": top_cast,
     "director": directors,
-    "keywords": movie_keywords
+    "keywords": movie_keywords,
+    
 }
 
 print(movie_record)
+
+poster_path = movie_record["poster_path"]
+
+if poster_path:
+    poster_url = f"https://image.tmdb.org/t/p/w500{poster_path}"
+    print("Poster URL:", poster_url)
+else:
+    print("Poster not available")

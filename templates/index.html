@@ -1,0 +1,175 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>CineMatch | Movie Recommendations</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <header>
+        <nav>
+            <h2>CineMatch</h2>
+            <span>Movie Recommendation Engine</span>
+        </nav>
+    </header>
+
+    <main>
+
+        <section class="hero">
+            <h1>Find Your Next Favourite Movie</h1>
+            <p>Discover movies recommended just for you.</p>
+
+            <form action="/" method="GET" class="search-form">
+                <input
+                    type="text"
+                    name="q"
+                    placeholder="Search for a movie..."
+                    required
+                >
+                <button type="submit">Search</button>
+            </form>
+        </section>
+
+        {% if error %}
+            <p class="error">{{ error }}</p>
+        {% endif %}
+
+        {% if search_results %}
+        <section class="results">
+            <h2>Select a Movie</h2>
+
+            <div class="movie-grid">
+                {% for movie in search_results %}
+                <div class="movie-card">
+
+                    {% if movie.poster_path %}
+                        <img
+                            class="movie-poster"
+                            src="https://image.tmdb.org/t/p/w500{{ movie.poster_path }}"
+                            alt="{{ movie.title }} poster"
+                            loading="lazy"
+                        >
+                    {% else %}
+                        <div class="poster-placeholder">
+                            Poster unavailable
+                        </div>
+                    {% endif %}
+
+                    <h3>{{ movie.title }}</h3>
+                    <p>{{ movie.genres | join(', ') }}</p>
+
+                    <form method="POST" action="/">
+                        <input
+                            type="hidden"
+                            name="movie_id"
+                            value="{{ movie.movie_id }}"
+                        >
+                        <button type="submit">
+                            Get Recommendations
+                        </button>
+                    </form>
+
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+        {% if selected_movie %}
+        <section class="selected">
+            <h2>Selected Movie</h2>
+
+            <div class="movie-card">
+
+                {% if selected_movie.poster_path %}
+                    <img
+                        class="movie-poster"
+                        src="https://image.tmdb.org/t/p/w500{{ selected_movie.poster_path }}"
+                        alt="{{ selected_movie.title }} poster"
+                    >
+                {% else %}
+                    <div class="poster-placeholder">
+                        Poster unavailable
+                    </div>
+                {% endif %}
+
+                <h3>{{ selected_movie.title }}</h3>
+                <p>{{ selected_movie.overview }}</p>
+
+                <p>
+                    Genres:
+                    {{ selected_movie.genres | join(', ') }}
+                </p>
+
+            </div>
+        </section>
+        {% endif %}
+
+        {% if recommendations %}
+        <section class="recommendations">
+            <h2>Recommended Movies</h2>
+
+            <div class="movie-grid">
+                {% for movie in recommendations %}
+                <div class="movie-card">
+
+                    <span class="rank">#{{ loop.index }}</span>
+
+                    {% if movie.poster_path %}
+                        <img
+                            class="movie-poster"
+                            src="https://image.tmdb.org/t/p/w500{{ movie.poster_path }}"
+                            alt="{{ movie.title }} poster"
+                            loading="lazy"
+                        >
+                    {% else %}
+                        <div class="poster-placeholder">
+                            Poster unavailable
+                        </div>
+                    {% endif %}
+
+                    <h3>{{ movie.title }}</h3>
+                    <p>{{ movie.genres | join(', ') }}</p>
+
+                    <div class="scores">
+                        <p>
+                            Similarity:
+                            {{ "%.3f" | format(movie.similarity_score) }}
+                        </p>
+
+                        <p>
+                            Hybrid Score:
+                            {{ "%.3f" | format(movie.hybrid_score) }}
+                        </p>
+                    </div>
+
+                    {% if movie.rating_available %}
+                        <p>
+                            Weighted Rating:
+                            {{ "%.2f" | format(movie.weighted_rating) }}
+                        </p>
+                    {% else %}
+                        <p class="unrated">Rating unavailable</p>
+                    {% endif %}
+
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+    </main>
+
+    <footer>
+        <p>CineMatch - Powered by a Hybrid Recommendation Engine</p>
+    </footer>
+
+</body>
+</html>

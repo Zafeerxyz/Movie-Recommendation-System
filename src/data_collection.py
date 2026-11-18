@@ -64,6 +64,7 @@ def get_movie_record(movie_id):
         "vote_average": movie_details["vote_average"],
         "vote_count": movie_details["vote_count"],
         "popularity": movie_details["popularity"],
+        "poster_path": movie_details.get("poster_path"),
         "cast": top_cast,
         "director": directors,
         "keywords": movie_keywords
@@ -244,8 +245,68 @@ def get_movie_ids(page=1):
     return movie_ids
 
 
- 
-    
+
+def get_movie_posters(total_pages):
+
+    checkpoint_path = Path("data/raw/poster_checkpoint.json")
+    progress_path = Path("data/raw/poster_progress.json")
+
+    # Load existing poster checkpoint
+    if checkpoint_path.exists():
+        with open(checkpoint_path, "r", encoding="utf-8") as file:
+            poster_lookup = json.load(file)
+    else:
+        poster_lookup = {}
+
+    # Load last completed page
+    if progress_path.exists():
+        with open(progress_path, "r", encoding="utf-8") as file:
+            progress = json.load(file)
+            last_page = progress["last_completed_page"]
+    else:
+        last_page = 0
+
+    print(f"Resuming from page: {last_page + 1}")
+
+    for page in range(last_page + 1, total_pages + 1):
+
+        try:
+            response = get_tmdb_data(
+                "movie/popular",
+                params={
+                    "language": "en-US",
+                    "page": page
+                }
+            )
+
+            for movie in response["results"]:
+                poster_lookup[str(movie["id"])] = movie.get("poster_path")
+
+            # Save poster checkpoint
+            with open(checkpoint_path, "w", encoding="utf-8") as file:
+                json.dump(poster_lookup, file, indent=4)
+
+            # Save progress only after successful checkpoint
+            with open(progress_path, "w", encoding="utf-8") as file:
+                json.dump(
+                    {"last_completed_page": page},
+                    file,
+                    indent=4
+                )
+
+            print(
+                f"Page {page}/{total_pages} completed | "
+                f"Unique movies: {len(poster_lookup)}"
+            )
+
+        except requests.exceptions.RequestException as error:
+            print(f"Failed at page {page}: {error}")
+            break
+
+        time.sleep(0.5)
+
+    return poster_lookup
+
     
     
 def collect_movie_ids(total_pages):
@@ -382,6 +443,8 @@ def save_failed_ids(failed_ids):
 
     print(f"Saved {len(failed_ids)} failed movie IDs")
     
+
+
 if __name__ == "__main__":
     
     movie_ids = load_movie_ids()
@@ -391,3 +454,5 @@ if __name__ == "__main__":
     movie_records = collect_movies(movie_ids)
 
     print("\nTotal movies collected:", len(movie_records))
+
+

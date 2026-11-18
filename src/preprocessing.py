@@ -44,19 +44,10 @@ def clean_movie_data(df):
 
     # Keep only the original TMDB columns
     original_columns = [
-        "movie_id",
-        "title",
-        "overview",
-        "genres",
-        "release_date",
-        "runtime",
-        "vote_average",
-        "vote_count",
-        "popularity",
-        "cast",
-        "director",
-        "keywords"
-    ]
+    "movie_id", "title", "overview", "genres", "release_date",
+    "runtime", "vote_average", "vote_count", "popularity",
+    "poster_path", "cast", "director", "keywords"
+]
 
     movies = movies[original_columns]
 

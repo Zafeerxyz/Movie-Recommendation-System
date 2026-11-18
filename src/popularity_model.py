@@ -54,3 +54,21 @@ def get_popular_movies(df, top_n=10):
             "weighted_rating"
         ]
     ].head(top_n).reset_index(drop=True)
+
+
+
+def normalize_weighted_ratings(df):
+    """
+    Normalize weighted ratings to a 0-1 scale.
+    """
+    movies = df.copy()
+
+    min_rating = movies["weighted_rating"].min()
+    max_rating = movies["weighted_rating"].max()
+
+    movies["normalized_rating"] = (
+        (movies["weighted_rating"] - min_rating)
+        / (max_rating - min_rating)
+    )
+
+    return movies
