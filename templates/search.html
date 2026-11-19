@@ -1,0 +1,60 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Results - CineMatch</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <header>
+        <h1>Search Results</h1>
+        <p>Results for "{{ query }}"</p>
+    </header>
+
+    <main>
+
+        {% if search_results %}
+
+        <div class="movie-grid">
+
+            {% for movie in search_results %}
+            <div class="movie-card">
+
+                {% if movie.poster_path %}
+                <img
+                    src="https://image.tmdb.org/t/p/w500{{ movie.poster_path }}"
+                    alt="{{ movie.title }}"
+                >
+                {% endif %}
+
+                <h3>{{ movie.title }}</h3>
+                <p>{{ movie.genres }}</p>
+
+                <form action="{{ url_for('recommend') }}" method="POST">
+                    <input
+                        type="hidden"
+                        name="movie_id"
+                        value="{{ movie.movie_id }}"
+                    >
+                    <button type="submit">Get Recommendations</button>
+                </form>
+
+            </div>
+            {% endfor %}
+
+        </div>
+
+        {% else %}
+        <p>No movies found for "{{ query }}".</p>
+        {% endif %}
+
+        <a href="{{ url_for('home') }}">← Back to Home</a>
+
+    </main>
+
+</body>
+</html>

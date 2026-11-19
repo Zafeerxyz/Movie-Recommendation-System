@@ -1,0 +1,45 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ category_name }} - CineMatch</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <header>
+        <h1>{{ category_name }}</h1>
+        <p>Explore movies in this category.</p>
+    </header>
+
+    <main>
+
+        <div class="movie-grid">
+
+            {% for movie in movies %}
+            <div class="movie-card">
+
+                {% if movie.poster_path %}
+                <img
+                    src="https://image.tmdb.org/t/p/w500{{ movie.poster_path }}"
+                    alt="{{ movie.title }}"
+                >
+                {% endif %}
+
+                <h3>{{ movie.title }}</h3>
+                <p>{{ movie.genres }}</p>
+
+            </div>
+            {% endfor %}
+
+        </div>
+
+        <a href="{{ url_for('home') }}">← Back to Home</a>
+
+    </main>
+
+</body>
+</html>
