@@ -1,70 +1,143 @@
-# 🎬 CineMatch – Hybrid Movie Recommendation System
+# 🎬 CineMatch — Movie Recommendation & Discovery System
 
-CineMatch is a movie recommendation system that helps users discover movies based on their interests. It combines content-based filtering and popularity-based ranking to generate personalized movie recommendations using movie metadata collected from the TMDB API.
+CineMatch is a machine learning-powered movie recommendation and discovery system built with Python and Flask. It helps users discover movies through two complementary approaches: **personalized content-based recommendations** and **unsupervised movie clustering**.
 
-The project uses Python, Machine Learning, Flask, and the TMDB API to build an end-to-end movie recommendation application.
+The recommendation engine combines TF-IDF, cosine similarity, and weighted ratings to identify relevant movies. The clustering component uses Truncated SVD and K-Means to group movies into meaningful content-based categories, allowing users to explore movies beyond individual recommendations.
 
-## 🚀 Features
+Movie metadata, ratings, cast information, keywords, and poster details are collected using the TMDB API.
 
-- **Movie Search:** Search movies by title.
-- **Content-Based Recommendations:** Find similar movies using genres, overview, cast, directors, and keywords.
-- **Popularity-Based Ranking:** Rank movies using weighted ratings.
-- **Hybrid Recommendation:** Combine content similarity and movie ratings.
-- **TMDB Integration:** Retrieve movie details, cast, keywords, and poster information.
-- **Movie Posters:** Display posters in search results and recommendations.
-- **Model Persistence:** Save and load trained recommendation artifacts.
-- **Checkpoint-Based Data Collection:** Resume data collection without restarting from the beginning.
+## ✨ Key Features
 
-## 🧠 Recommendation Approach
+### 🎯 1. Hybrid Movie Recommendation
+- Search movies by title.
+- Generate recommendations based on movie metadata.
+- Use TF-IDF to transform textual movie features into numerical vectors.
+- Calculate cosine similarity to identify similar movies.
+- Incorporate weighted ratings to improve recommendation ranking.
+- Combine content similarity and normalized weighted ratings.
+- Handle movies without rating information using content similarity alone.
 
-CineMatch uses a hybrid recommendation approach combining two methods.
+### 🎭 2. Movie Clustering & Discovery
+- Apply Truncated SVD to reduce high-dimensional TF-IDF features.
+- Use K-Means to group movies based on their content representations.
+- Evaluate different cluster configurations using Silhouette Score and Davies–Bouldin Index.
+- Profile clusters using their most frequent genres.
+- Identify representative movies closest to cluster centroids.
+- Explore movies through descriptive, manually assigned cluster labels.
+
+### 🌐 3. TMDB API Integration
+- Collect movie metadata from TMDB.
+- Retrieve movie details, cast, keywords, and poster information.
+- Use API-based data collection to build and maintain the movie catalogue.
+
+### ⚙️ 4. Application & Model Management
+- Interactive web interface built with Flask.
+- Display movie posters in search results and recommendations.
+- Persist trained models and processed data using Joblib and SciPy.
+- Organize data collection, preprocessing, feature engineering, and model logic into separate modules.
+
+## 🧠 Machine Learning Implementation
 
 ### 1. Content-Based Filtering
 
-The system combines the following movie attributes:
+CineMatch represents each movie using a combination of textual metadata:
 
-- Overview
+- Movie overview
 - Genres
 - Cast
 - Directors
 - Keywords
 
-These attributes are combined into a single text feature.
+These attributes are combined into a single text feature called `combined_features`.
 
-TF-IDF (Term Frequency–Inverse Document Frequency) converts the combined text into numerical vectors. Cosine similarity is then used to identify movies with similar content.
+The TF-IDF vectorizer converts this text into numerical feature vectors. Cosine similarity is then used to measure the similarity between movies.
+
+The current catalogue contains approximately **4,905 movies**, represented by a TF-IDF matrix with the shape:
+
+`(4905, 32913)`
 
 ### 2. Popularity-Based Ranking
 
-The system uses a weighted rating formula to account for both average ratings and vote counts.
+Average ratings alone can be misleading, especially when a movie has received only a small number of votes.
 
-This prevents movies with very few votes from automatically receiving the highest ranking.
+CineMatch uses a weighted rating that considers:
 
-Weighted ratings are normalized to a 0–1 scale.
+- Average movie rating
+- Number of votes
+- Overall average rating
+- Minimum vote threshold
 
-### 3. Hybrid Recommendation
+The resulting weighted ratings are normalized to a 0–1 scale before being incorporated into the hybrid recommendation model.
 
-The final recommendation score combines content similarity and normalized weighted ratings.
+### 3. Hybrid Recommendation Engine
 
-**For movies with available ratings:**
+The hybrid model combines content similarity and normalized weighted ratings.
 
-- 70% Content Similarity
-- 30% Normalized Weighted Rating
+For movies with available rating information:
 
-**For movies without available ratings:**
+| Component | Weight |
+|---|---:|
+| Content similarity | 70% |
+| Normalized weighted rating | 30% |
 
-- Content Similarity alone
+Movies without available ratings use content similarity alone. This avoids assigning artificial ratings to movies with missing rating information.
 
-This allows the system to recommend movies even when rating information is unavailable.
+### 4. Unsupervised Movie Clustering
 
-## 🛠️ Technologies Used
+CineMatch also includes a separate movie-discovery feature built using unsupervised learning.
+
+Since the TF-IDF matrix contains thousands of features, **Truncated SVD** is applied to reduce its dimensionality before clustering.
+
+The clustering workflow:
+
+1. Transform movie metadata into TF-IDF vectors.
+2. Reduce the feature space using Truncated SVD to 100 components.
+3. Experiment with different K-Means cluster configurations.
+4. Evaluate clustering performance using Silhouette Score and Davies–Bouldin Index.
+5. Train the final K-Means model with 15 clusters.
+6. Analyse cluster sizes and genre distributions.
+7. Identify representative movies closest to each cluster centroid.
+8. Assign descriptive labels to clusters for category-based movie discovery.
+
+Examples of movie categories include:
+
+- Superhero & Action
+- Sci-Fi & Monsters
+- Horror
+- Martial Arts & Action
+- Animation & Family
+- Crime & Dark Comedy
+- Psychological Horror
+- Romance & Drama
+- Space & Sci-Fi
+- War & History
+- Crime & Action Thriller
+
+The clusters are generated by K-Means. The descriptive labels are assigned after examining the movies and genres within each cluster.
+
+## 📊 Recommendation Evaluation
+
+The project includes two evaluation measures for examining recommendation quality.
+
+| Metric | Purpose |
+|---|---|
+| Genre Overlap | Measures the similarity between the selected movie's genres and recommended movies' genres using Jaccard similarity. |
+| Intra-list Diversity | Measures how different the recommended movies are from one another using their TF-IDF representations. |
+
+These measures help assess both recommendation relevance and variety.
+
+## 🛠️ Tech Stack
 
 | Category | Technologies |
 |---|---|
-| Programming Language | Python |
+| Programming | Python |
 | Data Processing | Pandas, NumPy |
 | Machine Learning | Scikit-learn |
 | Text Vectorization | TF-IDF |
 | Similarity Measurement | Cosine Similarity |
+| Dimensionality Reduction | Truncated SVD |
+| Clustering | K-Means |
+| Clustering Evaluation | Silhouette Score, Davies–Bouldin Index |
 | API Integration | TMDB API, Requests |
 | Web Framework | Flask |
 | Model Persistence | Joblib, SciPy |
@@ -74,7 +147,15 @@ This allows the system to recommend movies even when rating information is unava
 ## 📁 Project Structure
 
 ```text
-MovieRecommendation/
+Movie-Recommendation-System/
+│
+├── data/
+│   ├── raw/
+│   └── processed/
+│       └── movies_processed.csv
+│
+├── notebooks/
+│   └── movie_recommendation.ipynb
 │
 ├── src/
 │   ├── content_model.py
@@ -85,45 +166,104 @@ MovieRecommendation/
 │   ├── persistence.py
 │   ├── popularity_model.py
 │   ├── preprocessing.py
-│   └── tmdb_client.py
-│
-├── data/
-│   └── raw/
-│          ├── discovery_progress.json
-│          ├── failed_movie_ids.json
-│          ├── failed_poster_ids.json
-│          ├── missing_poster_checkpoint.json
-│          ├── missing_poster_progress.json
-│          ├── movie_ids.json
-│          ├── movies_raw_before_posters.json
-│          ├── movies_raw.json
-│          ├── poster_checkpoint.json
-│         ├── poster_progress.json
-│   └── processed/
-          └── movies_processed.csv
-│
-├── notebooks/
-│   └── movie_recommendation.ipynb
+│   ├── tmdb_client.py
+│   └── clustering.py
 │
 ├── outputs/
-│   └── models/
-│       ├── movies_catalogue.joblib
-│       ├── tfidf_matrix.npz
-│       └── tfidf_vectorizer.joblib
+│   ├── models/
+│   │   ├── movies_catalogue.joblib
+│   │   ├── tfidf_matrix.npz
+│   │   ├── tfidf_vectorizer.joblib
+│   │   ├── movie_svd.joblib
+│   │   ├── movie_kmeans.joblib
+│   │   └── movies_clustered.joblib
+│   │
+│   ├── kmeans_evaluation.csv
+│   └── cluster_summary.csv
 │
 ├── templates/
-│   └── index.html
+│   ├── index.html
+│   ├── search.html
+│   ├── recommendations.html
+│   ├── category.html
+│   └── error.html
 │
 ├── static/
 │   └── style.css
 │
 ├── tests/
-    └── api_test.py
-│
 ├── app.py
 ├── requirements.txt
 ├── README.md
 └── .gitignore
+```
+
+## 🔄 Project Workflow
+
+### Hybrid Recommendation Workflow
+
+```text
+              TMDB API
+                  |
+                  v
+           Data Collection
+                  |
+                  v
+          Data Preprocessing
+                  |
+                  v
+          Feature Engineering
+                  |
+                  v
+           TF-IDF Vectorization
+                  |
+                  v
+          Cosine Similarity
+                  |
+                  +------------------+
+                  |                  |
+                  v                  v
+          Content Similarity    Weighted Rating
+                  |                  |
+                  +--------+---------+
+                           |
+                           v
+                    Hybrid Scoring
+                           |
+                           v
+                 Top-N Recommendations
+```
+
+### Movie Clustering Workflow
+
+```text
+          Processed Movie Catalogue
+                     |
+                     v
+             TF-IDF Features
+                     |
+                     v
+               Truncated SVD
+                     |
+                     v
+              Reduced Features
+                     |
+                     v
+                K-Means
+                     |
+                     v
+             Movie Clusters
+                     |
+          +----------+-----------+
+          |          |           |
+          v          v           v
+       Cluster    Genre      Representative
+       Evaluation Profiling     Movies
+          |          |           |
+          +----------+-----------+
+                     |
+                     v
+             Category Discovery
 ```
 
 ## ⚙️ Installation and Setup
@@ -131,8 +271,8 @@ MovieRecommendation/
 ### 1. Clone the repository
 
 ```bash
-git clone <YOUR_GITHUB_REPOSITORY_URL>
-cd MovieRecommendation
+git clone https://github.com/Zafeerxyz/Movie-Recommendation-System.git
+cd Movie-Recommendation-System
 ```
 
 ### 2. Create a virtual environment
@@ -143,12 +283,14 @@ python -m venv venv
 
 Activate it:
 
-**Windows:**
+**Windows**
+
 ```bash
 venv\Scripts\activate
 ```
 
-**Linux / macOS:**
+**Linux / macOS**
+
 ```bash
 source venv/bin/activate
 ```
@@ -164,10 +306,10 @@ pip install -r requirements.txt
 Create a `.env` file in the project root:
 
 ```env
-TMDB_API_KEY=your_tmdb_api_bearer_token
+TMDB_API_KEY=your_tmdb_api_key
 ```
 
-Keep `.env` out of version control. Never commit your API credentials.
+Keep your API key private and never commit your `.env` file.
 
 ### 5. Run the application
 
@@ -175,54 +317,39 @@ Keep `.env` out of version control. Never commit your API credentials.
 python app.py
 ```
 
-Open your browser at:
+Open the application at:
 
-```text
-http://127.0.0.1:5000/
-```
+`http://127.0.0.1:5000/`
 
-**Note:** The application requires the saved model artifacts and movie catalogue under `outputs/models/`. The repository must include these artifacts or provide instructions for generating them before running the application.
+**Note:** The application requires the saved movie catalogue and model artifacts under `outputs/models/`. Ensure these files are available before starting the application.
 
-## 📊 Model Artifacts
+## 📦 Saved Model Artifacts
 
-The recommendation system uses three saved artifacts:
-
-| Artifact | Description |
+| Artifact | Purpose |
 |---|---|
 | `tfidf_vectorizer.joblib` | Fitted TF-IDF vectorizer |
-| `tfidf_matrix.npz` | Sparse TF-IDF feature matrix |
+| `tfidf_matrix.npz` | Sparse movie feature matrix |
 | `movies_catalogue.joblib` | Processed movie catalogue |
+| `movie_svd.joblib` | Trained dimensionality reduction model |
+| `movie_kmeans.joblib` | Trained K-Means clustering model |
+| `movies_clustered.joblib` | Movie catalogue containing cluster assignments |
 
-These artifacts are loaded when the Flask application starts, avoiding the need to rebuild the recommendation model for every request.
-
-## 🔄 Project Workflow
-
-1. Collect movie information through the TMDB API.
-2. Preprocess and clean the collected movie data.
-3. Perform feature engineering by combining movie metadata.
-4. Generate TF-IDF vectors.
-5. Calculate content similarity using cosine similarity.
-6. Calculate popularity-based weighted ratings.
-7. Combine both approaches using hybrid scoring.
-8. Save the trained artifacts.
-9. Serve recommendations through the Flask application.
-
-## 🔮 Future Improvements
+## 🚀 Future Improvements
 
 - Migrate the Flask application to FastAPI.
-- Develop REST API endpoints for movie recommendations.
-- Improve recommendation quality through user feedback.
+- Develop dedicated REST API endpoints.
+- Incorporate user feedback into recommendation ranking.
 - Experiment with different hybrid scoring weights.
-- Add automated testing and recommendation evaluation.
-- Improve API reliability with retries and better error handling.
-- Explore collaborative filtering and more advanced recommendation techniques.
+- Explore collaborative filtering approaches.
+- Improve recommendation evaluation and automated testing.
+- Expand the movie catalogue through additional TMDB data collection.
 
 ## 🙏 Acknowledgements
 
-Movie information and poster metadata are collected using the [TMDB API](https://developer.themoviedb.org/).
+Movie metadata and poster information are collected using the [TMDB API](https://developer.themoviedb.org/).
 
 This product uses the TMDB API but is not endorsed or certified by TMDB.
 
 ---
 
-**CineMatch – Discover movies you'll love.**
+**CineMatch — Discover, explore, and find your next favourite movie.**
